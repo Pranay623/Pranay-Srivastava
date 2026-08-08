@@ -1,0 +1,92 @@
+<div class="gift-banner gift-banner-{{ section.id }}" id="gift-banner-{{section.id}}">
+
+
+    {%- if section.settings.show_top_bar -%}
+    <header class = "gift-banner__top-bar">
+        <div class = "gift-banner__top-container">
+
+            <div class="gift-banner__logo">
+                <a href="{{section.settings.logo_url | default: routes.root_url}}">
+                    {{section.settings.logo_text | escape}}
+                </a>
+            </div>
+
+            <div class="gift-banner__announcement">
+              <span>{{section.settings.announcement_text | escape}}</span>
+            </div>
+
+            <div class="gift-banner__cta-top">
+                <button type="button" class="gift-banner__btn-yellow" id="btn-choose-gift-{{section.id}}">
+                <span class="btn-text">{{section.settings.choose_gift_text | escape}}</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    {%- endif -%}
+
+
+
+
+
+
+    <div class="gift-banner__hero">
+        <div class="gift-banner__hero-container">
+
+            <div class="gift-banner__content">
+                <h1 class="gift-banner__title">{{section.settings.heading | escape}}</h1>
+
+                <p class="gift-banner_description">
+                    {{section.settings.description | escape}}
+                </p>
+
+                <div class="gift-banner_cta-hero">
+                    <a href="{{section.settings.button_link | default: '#gift-grid-section'}}" class="goft-banner__btn-black" id="btn-shop-now-{{section.id}}">
+                       <span class="btn-text>{{section.settings.button_label | escape}}</span>
+                       <span class="btn-arrow aria-hidden="true">&rarr;</span>
+                    </a>
+                </div>
+            </div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% schema %}
+{
+    "name" : "Gift Banner",
+    "tag": "section",
+    "class" : "section-gift-banner",
+    "settings": [
+        {
+            "type": "header",
+            "content": "1. Top Announcement Bar"
+        },
+        {
+            "type": "checkbox",
+            "id" : "show_top_bar",
+            "label": "Show Top Announcement Bar",
+            "default": true
+        }
+    ],
+    "presets" : [
+        {
+            "name" : "Gift Banner"
+        }
+    ]
+}
+{% endschema %}
+
