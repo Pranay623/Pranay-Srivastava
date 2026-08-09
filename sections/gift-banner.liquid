@@ -1,6 +1,6 @@
 {% liquid
   assign hero_image = section.settings.hero_image
-  assign fallback_url = 'https://res.cloudinary.com/dll6vk0kp/image/upload/v1786116587/Frame_q39xvh.png'
+  assign fallback_url = 'Frame.svg' | asset_url
 %}
 
 <section class="gift-banner gift-banner-{{ section.id }}" id="gift-banner-{{ section.id }}">
