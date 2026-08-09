@@ -8,12 +8,12 @@
       "type": "gift-grid",
       "settings": {},
       "blocks": {
-        "tile_1": { "type": "hotspot_image", "settings": { "hotspot_x": 75, "hotspot_y": 30 } },
-        "tile_2": { "type": "hotspot_image", "settings": { "hotspot_x": 68, "hotspot_y": 25 } },
-        "tile_3": { "type": "hotspot_image", "settings": { "hotspot_x": 60, "hotspot_y": 20 } },
-        "tile_4": { "type": "hotspot_image", "settings": { "enable_second_hotspot": true, "hotspot_x": 65, "hotspot_y": 22, "hotspot_2_x": 32, "hotspot_2_y": 58 } },
-        "tile_5": { "type": "hotspot_image", "settings": { "hotspot_x": 55, "hotspot_y": 25 } },
-        "tile_6": { "type": "hotspot_image", "settings": { "hotspot_x": 62, "hotspot_y": 30 } }
+        "tile_1": { "type": "hotspot_image", "settings": { "hotspot_x": 35, "hotspot_y": 58 } },
+        "tile_2": { "type": "hotspot_image", "settings": { "hotspot_x": 42, "hotspot_y": 58 } },
+        "tile_3": { "type": "hotspot_image", "settings": { "hotspot_x": 45, "hotspot_y": 45 } },
+        "tile_4": { "type": "hotspot_image", "settings": { "enable_second_hotspot": false, "hotspot_x": 32, "hotspot_y": 52 } },
+        "tile_5": { "type": "hotspot_image", "settings": { "hotspot_x": 48, "hotspot_y": 58 } },
+        "tile_6": { "type": "hotspot_image", "settings": { "hotspot_x": 48, "hotspot_y": 46 } }
       },
       "block_order": [
         "tile_1",
