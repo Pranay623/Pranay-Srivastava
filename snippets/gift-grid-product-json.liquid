@@ -4,39 +4,79 @@
   if featured_img
     assign img_url = featured_img | image_url: width: 800
   endif
+
+  assign prod_title = product.title
+  if prod_title == blank
+    assign prod_title = 'Orange Wide Leg'
+  endif
+
+  assign prod_price = ''
+  if product.price and product.price > 0
+    assign prod_price = product.price | money
+  else
+    assign prod_price = '980,00€'
+  endif
+
+  assign desc = product.description | strip_html | truncatewords: 30
+  if desc == blank
+    assign desc = 'This one-piece swimsuit is crafted from jersey featuring an allover micro Monogram motif in relief.'
+  endif
 %}
 {
-  "id": {{ product.id | json }},
-  "title": {{ product.title | escape | json }},
-  "description": {{ product.description | strip_html | truncatewords: 30 | json }},
-  "price": {{ product.price | money | json }},
+  "id": {{ product.id | default: 'demo-product' | json }},
+  "title": {{ prod_title | escape | json }},
+  "description": {{ desc | json }},
+  "price": {{ prod_price | json }},
   "image": {{ img_url | json }},
   "options": [
-    {% for option in product.options_with_values %}
-      {
-        "name": {{ option.name | json }},
-        "values": {{ option.values | json }}
-      }{% unless forloop.last %},{% endunless %}
-    {% endfor %}
+    {% if product.options_with_values and product.options_with_values.size > 0 %}
+      {% for option in product.options_with_values %}
+        {
+          "name": {{ option.name | json }},
+          "values": {{ option.values | json }}
+        }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    {% else %}
+      { "name": "Color", "values": ["White", "Black"] },
+      { "name": "Size", "values": ["XS", "S", "M", "L", "XL"] }
+    {% endif %}
   ],
   "variants": [
-    {% for variant in product.variants %}
-      {% liquid
-        assign var_img = variant.featured_media.preview_image | default: variant.featured_image
-        assign var_img_url = ''
-        if var_img
-          assign var_img_url = var_img | image_url: width: 800
-        else
-          assign var_img_url = img_url
-        endif
-      %}
+    {% if product.variants and product.variants.size > 0 %}
+      {% for variant in product.variants %}
+        {% liquid
+          assign var_img = variant.featured_media.preview_image | default: variant.featured_image
+          assign var_img_url = ''
+          if var_img
+            assign var_img_url = var_img | image_url: width: 800
+          else
+            assign var_img_url = img_url
+          endif
+          assign v_price = variant.price | money | default: prod_price
+        %}
+        {
+          "id": {{ variant.id | json }},
+          "price": {{ v_price | json }},
+          "available": {{ variant.available | json }},
+          "image": {{ var_img_url | json }},
+          "options": {{ variant.options | json }}
+        }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    {% else %}
       {
-        "id": {{ variant.id | json }},
-        "price": {{ variant.price | money | json }},
-        "available": {{ variant.available | json }},
-        "image": {{ var_img_url | json }},
-        "options": {{ variant.options | json }}
-      }{% unless forloop.last %},{% endunless %}
-    {% endfor %}
+        "id": "demo-v1",
+        "price": {{ prod_price | json }},
+        "available": true,
+        "image": {{ img_url | json }},
+        "options": ["White", "S"]
+      },
+      {
+        "id": "demo-v2",
+        "price": {{ prod_price | json }},
+        "available": true,
+        "image": {{ img_url | json }},
+        "options": ["Black", "S"]
+      }
+    {% endif %}
   ]
 }
