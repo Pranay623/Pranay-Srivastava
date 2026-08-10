@@ -1,9 +1,23 @@
 {% liquid
   assign fallback_collection = section.settings.collection | default: collections.all
   assign fallback_products = fallback_collection.products
+
+  assign soft_jacket_product = all_products['soft-winter-jacket']
+  assign soft_jacket_variant_id = ''
+  if soft_jacket_product != blank
+    assign soft_jacket_variant_id = soft_jacket_product.first_available_variant.id | default: soft_jacket_product.variants[0].id
+  else
+    for p in collections.all.products
+      assign p_title_lower = p.title | downcase
+      if p_title_lower contains 'soft winter jacket' or p_title_lower contains 'winter jacket'
+        assign soft_jacket_variant_id = p.first_available_variant.id | default: p.variants[0].id
+        break
+      endif
+    endfor
+  endif
 %}
 
-<section class="gift-grid gift-grid-{{ section.id }}" id="gift-grid-section">
+<section class="gift-grid gift-grid-{{ section.id }}" id="gift-grid-section" data-soft-winter-jacket-id="{{ soft_jacket_variant_id }}">
 
   <div class="gift-grid__inner">
 
@@ -91,6 +105,14 @@
               {% endunless %}
             {% endif %}
 
+            <div class="gift-grid__added-badge" aria-label="Added to cart" title="Added to cart">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+            </div>
+
           </div>
 
         {% endfor %}
@@ -137,6 +159,14 @@
             <script type="application/json" data-product-data="{{ product.id }}">
               {% render 'gift-grid-product-json', product: product %}
             </script>
+
+            <div class="gift-grid__added-badge" aria-label="Added to cart" title="Added to cart">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+            </div>
 
           </div>
         {% endfor %}
@@ -194,6 +224,42 @@
         <span aria-hidden="true">&rarr;</span>
       </button>
 
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="gift-grid__floating-cart"
+    data-floating-cart-trigger
+    aria-label="Open cart"
+    title="Open cart"
+  >
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="21" r="1"></circle>
+      <circle cx="20" cy="21" r="1"></circle>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+    </svg>
+    <span class="gift-grid__floating-cart-count" data-floating-cart-count>{{ cart.item_count | default: 0 }}</span>
+  </button>
+
+  <!-- CART MODAL -->
+  <div class="gift-grid__cart-modal" data-cart-modal hidden>
+    <div class="gift-grid__cart-modal-backdrop" data-cart-modal-close></div>
+    <div class="gift-grid__cart-modal-panel">
+      <div class="gift-grid__cart-modal-header">
+        <h3 class="gift-grid__cart-modal-title">Your Cart</h3>
+        <button type="button" class="gift-grid__cart-modal-close" data-cart-modal-close aria-label="Close cart">&times;</button>
+      </div>
+      <div class="gift-grid__cart-modal-body" data-cart-modal-body>
+        <p class="gift-grid__cart-empty">Your cart is empty.</p>
+      </div>
+      <div class="gift-grid__cart-modal-footer" data-cart-modal-footer hidden>
+        <div class="gift-grid__cart-modal-total">
+          <span>Total</span>
+          <span data-cart-modal-total>$0.00</span>
+        </div>
+        <a href="/checkout" class="gift-grid__cart-modal-checkout">CHECKOUT</a>
+      </div>
     </div>
   </div>
 
@@ -274,6 +340,241 @@
   .gift-grid-{{ section.id }} .gift-grid__hotspot:hover {
     background: #fff;
     transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  /* FLOATING CART BUTTON (BOTTOM RIGHT OF SCREEN) */
+  .gift-grid-{{ section.id }} .gift-grid__floating-cart {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 99999;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #000;
+    color: #fff;
+    border: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  }
+
+  .gift-grid-{{ section.id }} .gift-grid__floating-cart:hover {
+    background: #111;
+  }
+
+  .gift-grid-{{ section.id }} .gift-grid__floating-cart-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 11px;
+    background: #1652f0;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Added Card State: Dimmed Image */
+  .gift-grid-{{ section.id }} .gift-grid__tile.is-added .gift-grid__image {
+    opacity: 0.65;
+    filter: brightness(0.92);
+    transition: opacity 0.3s ease, filter 0.3s ease;
+  }
+
+  /* ================= CART MODAL ================= */
+  .gift-grid__cart-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gift-grid__cart-modal[hidden] {
+    display: none !important;
+  }
+
+  .gift-grid__cart-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .gift-grid__cart-modal-panel {
+    position: relative;
+    width: 90%;
+    max-width: 480px;
+    max-height: 80vh;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  }
+
+  .gift-grid__cart-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .gift-grid__cart-modal-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+  }
+
+  .gift-grid__cart-modal-close {
+    background: none;
+    border: 0;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    color: #333;
+    padding: 0 4px;
+  }
+
+  .gift-grid__cart-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .gift-grid__cart-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+    font-size: 15px;
+  }
+
+  .gift-grid__cart-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .gift-grid__cart-item-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #f4f4f4;
+  }
+
+  .gift-grid__cart-item-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .gift-grid__cart-item-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gift-grid__cart-item-variant {
+    font-size: 12px;
+    color: #888;
+    margin: 0 0 4px;
+  }
+
+  .gift-grid__cart-item-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: #000;
+  }
+
+  .gift-grid__cart-item-qty {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .gift-grid__cart-item-qty button {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+  }
+
+  .gift-grid__cart-item-qty span {
+    font-size: 13px;
+    min-width: 16px;
+    text-align: center;
+  }
+
+  .gift-grid__cart-item-remove {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 18px;
+    color: #999;
+    padding: 4px;
+    flex-shrink: 0;
+  }
+
+  .gift-grid__cart-item-remove:hover {
+    color: #000;
+  }
+
+  .gift-grid__cart-modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e5e5e5;
+  }
+
+  .gift-grid__cart-modal-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 14px;
+  }
+
+  .gift-grid__cart-modal-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 48px;
+    background: #000;
+    color: #fff;
+    border: 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .gift-grid__cart-modal-checkout:hover {
+    background: #222;
   }
 
   /* ================= MODAL ================= */
@@ -861,18 +1162,74 @@
       }
     });
 
+    function isBlackAndMediumSelected() {
+      if (!selectedOptions || !selectedOptions.length) return false;
+      var hasBlack = false;
+      var hasMedium = false;
+
+      selectedOptions.forEach(function (optVal) {
+        if (!optVal) return;
+        var valStr = optVal.toString().toLowerCase().trim();
+        if (valStr === 'black') {
+          hasBlack = true;
+        }
+        if (valStr === 'medium' || valStr === 'm') {
+          hasMedium = true;
+        }
+      });
+
+      return hasBlack && hasMedium;
+    }
+
+    // Auto-discover Soft Winter Jacket ID if not supplied via Liquid
+    (function fetchSoftWinterJacketId() {
+      if (root.dataset.softWinterJacketId) return;
+
+      fetch('/products/soft-winter-jacket.js')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (prod) {
+          if (prod && prod.variants && prod.variants[0]) {
+            root.dataset.softWinterJacketId = prod.variants[0].id;
+            window.softWinterJacketVariantId = prod.variants[0].id;
+          }
+        })
+        .catch(function () {
+          fetch('/search/suggest.json?q=Soft+Winter+Jacket&resources[type]=product')
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (res) {
+              if (res && res.resources && res.resources.results && res.resources.results.products) {
+                var p = res.resources.results.products[0];
+                if (p && p.variants && p.variants[0]) {
+                  root.dataset.softWinterJacketId = p.variants[0].id;
+                  window.softWinterJacketVariantId = p.variants[0].id;
+                }
+              }
+            });
+        });
+    })();
+
     if (addButton) {
       addButton.addEventListener('click', function () {
         var variantId = addButton.dataset.variantId;
         if (!variantId || addButton.disabled) return;
 
+        var numericId = Number(variantId);
+        if (!numericId) return;
+
         addButton.disabled = true;
         addButtonLabel.textContent = 'Adding...';
+
+        var itemsToAdd = [{ id: numericId, quantity: 1 }];
+
+        var softJacketId = root.dataset.softWinterJacketId || window.softWinterJacketVariantId;
+        if (isBlackAndMediumSelected() && softJacketId && String(softJacketId) !== '' && String(softJacketId) !== String(variantId)) {
+          itemsToAdd.push({ id: Number(softJacketId), quantity: 1 });
+        }
 
         fetch('/cart/add.js', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ items: [{ id: variantId, quantity: 1 }] })
+          body: JSON.stringify({ items: itemsToAdd })
         })
           .then(function (response) {
             if (!response.ok) throw new Error('Add to cart failed');
@@ -880,19 +1237,7 @@
           })
           .then(function () {
             addButtonLabel.textContent = 'Added';
-
-            return fetch('/cart.js')
-              .then(function (r) { return r.json(); })
-              .then(function (cart) {
-                document.dispatchEvent(new CustomEvent('cart:updated', { detail: cart }));
-
-                var countEls = document.querySelectorAll('[data-cart-count], .cart-count, #cart-icon-bubble');
-                countEls.forEach(function (el) {
-                  if (el.dataset.cartCount !== undefined || el.classList.contains('cart-count')) {
-                    el.textContent = cart.item_count;
-                  }
-                });
-              });
+            return fetchAndRenderCart();
           })
           .catch(function () {
             addButtonLabel.textContent = 'Something went wrong';
@@ -904,6 +1249,196 @@
           });
       });
     }
+
+    var floatingCartBtn = root.querySelector('[data-floating-cart-trigger]');
+    var floatingCartCount = root.querySelector('[data-floating-cart-count]');
+    var cartModal = root.querySelector('[data-cart-modal]');
+    var cartModalBody = root.querySelector('[data-cart-modal-body]');
+    var cartModalFooter = root.querySelector('[data-cart-modal-footer]');
+    var cartModalTotal = root.querySelector('[data-cart-modal-total]');
+
+    function updateFloatingCartCount(count) {
+      if (floatingCartCount) {
+        floatingCartCount.textContent = count;
+      }
+    }
+
+    function formatMoney(cents) {
+      return '$' + (cents / 100).toFixed(2);
+    }
+
+    function renderCartModal(cart) {
+      if (!cartModalBody) return;
+
+      if (!cart || !cart.items || cart.items.length === 0) {
+        cartModalBody.innerHTML = '<p class="gift-grid__cart-empty">Your cart is empty.</p>';
+        if (cartModalFooter) cartModalFooter.hidden = true;
+        return;
+      }
+
+      var html = '';
+      cart.items.forEach(function (item, index) {
+        var imgSrc = item.image ? item.image.replace(/(\.\w+)$/, '_120x$1') : '';
+        var variantTitle = item.variant_title || '';
+        html += '<div class="gift-grid__cart-item" data-cart-line="' + (index + 1) + '" data-cart-item-key="' + item.key + '">';
+        html += imgSrc ? '<img class="gift-grid__cart-item-img" src="' + imgSrc + '" alt="' + (item.title || '') + '">' : '<div class="gift-grid__cart-item-img"></div>';
+        html += '<div class="gift-grid__cart-item-info">';
+        html += '<p class="gift-grid__cart-item-title">' + (item.title || '') + '</p>';
+        if (variantTitle) html += '<p class="gift-grid__cart-item-variant">' + variantTitle + '</p>';
+        html += '<span class="gift-grid__cart-item-price">' + formatMoney(item.final_line_price) + '</span>';
+        html += '<div class="gift-grid__cart-item-qty">';
+        html += '<button type="button" data-qty-action="minus" data-line="' + (index + 1) + '">−</button>';
+        html += '<span>' + item.quantity + '</span>';
+        html += '<button type="button" data-qty-action="plus" data-line="' + (index + 1) + '">+</button>';
+        html += '</div>';
+        html += '</div>';
+        html += '<button type="button" class="gift-grid__cart-item-remove" data-remove-line="' + (index + 1) + '" title="Remove">&times;</button>';
+        html += '</div>';
+      });
+
+      cartModalBody.innerHTML = html;
+      if (cartModalFooter) {
+        cartModalFooter.hidden = false;
+        if (cartModalTotal) {
+          cartModalTotal.textContent = formatMoney(cart.total_price);
+        }
+      }
+    }
+
+    function fetchAndRenderCart() {
+      return fetch('/cart.js')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (cart) {
+          if (cart) {
+            updateFloatingCartCount(cart.item_count || 0);
+            renderCartModal(cart);
+            syncTilesFromCart(cart);
+          }
+          return cart;
+        });
+    }
+
+    function syncTilesFromCart(cart) {
+      var addedProductIds = (cart.items || []).map(function (item) {
+        return item.product_id ? item.product_id.toString() : '';
+      });
+      var tiles = root.querySelectorAll('.gift-grid__tile');
+      tiles.forEach(function (tile) {
+        var buttons = tile.querySelectorAll('[data-product-id]');
+        var isMatch = false;
+        buttons.forEach(function (btn) {
+          if (addedProductIds.indexOf(btn.dataset.productId) !== -1) {
+            isMatch = true;
+          }
+        });
+        if (isMatch) {
+          tile.classList.add('is-added');
+        } else {
+          tile.classList.remove('is-added');
+        }
+      });
+    }
+
+    function updateCartLine(line, qty) {
+      return fetch('/cart/change.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ line: line, quantity: qty })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (cart) {
+          updateFloatingCartCount(cart.item_count || 0);
+          renderCartModal(cart);
+          syncTilesFromCart(cart);
+          document.dispatchEvent(new CustomEvent('cart:updated', { detail: cart }));
+
+          var countEls = document.querySelectorAll('[data-cart-count], .cart-count, #cart-icon-bubble');
+          countEls.forEach(function (el) {
+            if (el.dataset.cartCount !== undefined || el.classList.contains('cart-count')) {
+              el.textContent = cart.item_count;
+            }
+          });
+        });
+    }
+
+    function openCartModal() {
+      if (!cartModal) return;
+      fetchAndRenderCart().then(function () {
+        cartModal.hidden = false;
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    function closeCartModal() {
+      if (!cartModal) return;
+      cartModal.hidden = true;
+      document.body.style.overflow = '';
+    }
+
+    // Floating cart button click -> open cart modal
+    if (floatingCartBtn) {
+      floatingCartBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openCartModal();
+      });
+    }
+
+    // Cart modal event delegation (close, qty, remove)
+    if (cartModal) {
+      cartModal.addEventListener('click', function (e) {
+        if (e.target.closest('[data-cart-modal-close]')) {
+          closeCartModal();
+          return;
+        }
+
+        var minusBtn = e.target.closest('[data-qty-action="minus"]');
+        if (minusBtn) {
+          var line = parseInt(minusBtn.dataset.line, 10);
+          var qtySpan = minusBtn.parentNode.querySelector('span');
+          var currentQty = parseInt(qtySpan.textContent, 10);
+          updateCartLine(line, Math.max(0, currentQty - 1));
+          return;
+        }
+
+        var plusBtn = e.target.closest('[data-qty-action="plus"]');
+        if (plusBtn) {
+          var line2 = parseInt(plusBtn.dataset.line, 10);
+          var qtySpan2 = plusBtn.parentNode.querySelector('span');
+          var currentQty2 = parseInt(qtySpan2.textContent, 10);
+          updateCartLine(line2, currentQty2 + 1);
+          return;
+        }
+
+        var removeBtn = e.target.closest('[data-remove-line]');
+        if (removeBtn) {
+          var removeLine = parseInt(removeBtn.dataset.removeLine, 10);
+          updateCartLine(removeLine, 0);
+          return;
+        }
+      });
+    }
+
+    // ESC to close cart modal
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && cartModal && !cartModal.hidden) {
+        closeCartModal();
+      }
+    });
+
+    // Sync tiles and cart count on page load
+    function syncAddedTilesWithCart() {
+      fetchAndRenderCart().catch(function () {});
+    }
+
+    // Real-time cart state synchronization on cart events
+    ['cart:updated', 'cart:change', 'cart:refresh'].forEach(function (evtName) {
+      document.addEventListener(evtName, function () {
+        setTimeout(syncAddedTilesWithCart, 100);
+      });
+    });
+
+    syncAddedTilesWithCart();
   })();
 </script>
 
