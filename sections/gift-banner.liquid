@@ -7,6 +7,14 @@
 
   <!-- HEADER -->
   <header class="gift-banner__header">
+    <button type="button" class="gift-banner__nav-toggle" aria-label="Toggle navigation">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+
     <div class="gift-banner__logo">
       <a href="{{ section.settings.logo_url | default: routes.root_url }}">
         {{ section.settings.logo_text | default: 'TISSO VISON' | escape }}
@@ -116,7 +124,9 @@
     box-sizing: border-box;
   }
 
-  /* ================= HEADER ================= */
+  .gift-banner-{{ section.id }} .gift-banner__nav-toggle {
+    display: none;
+  }
 
   .gift-banner-{{ section.id }} .gift-banner__header {
     height: 70px;
@@ -437,85 +447,171 @@
 
   /* ================= MOBILE ================= */
 
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 749px) {
 
+    /* HEADER: Hamburger on left, Centered logo, hide announcement and choose gift button */
     .gift-banner-{{ section.id }} .gift-banner__header {
-      height: auto;
-      min-height: 70px;
-      padding: 14px 18px;
-      gap: 12px;
-      flex-wrap: wrap;
+      height: 60px;
+      min-height: 60px;
+      padding: 0 16px;
+      background: #f4f4f4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .gift-banner-{{ section.id }} .gift-banner__nav-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: 0;
+      padding: 4px;
+      cursor: pointer;
+      color: #000;
+      z-index: 2;
+    }
+
+    .gift-banner-{{ section.id }} .gift-banner__logo {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      z-index: 1;
     }
 
     .gift-banner-{{ section.id }} .gift-banner__logo a {
-      font-size: 18px;
-      letter-spacing: 2px;
+      font-size: 20px;
+      letter-spacing: 2.2px;
+      font-weight: 700;
+      color: #000;
     }
 
+    .gift-banner-{{ section.id }} .gift-banner__announcement,
     .gift-banner-{{ section.id }} .gift-banner__choose {
-      width: clamp(125px, 38vw, 145px);
-      height: 42px;
-      font-size: 11px;
-      gap: 9px;
+      display: none !important;
     }
 
+    /* HERO CONTAINER: flex column layout to strictly order content above image */
     .gift-banner-{{ section.id }} .gift-banner__hero {
-      height: 760px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: auto;
+      min-height: 0;
+      padding-top: 28px;
+      padding-bottom: 0;
+      overflow: hidden;
+      background: #fff;
     }
 
-    .gift-banner-{{ section.id }} .gift-banner__frame--top {
-      width: 135%;
-      left: -17.5%;
-      top: clamp(-110px, -22vw, -75px);
-    }
-
-    .gift-banner-{{ section.id }} .gift-banner__frame--bottom {
-      top: clamp(360px, 82vw, 420px);
-      width: 135%;
-      left: -7.5%;
-    }
-
+    /* CONTENT PANEL: order 1 places text at top of hero section */
     .gift-banner-{{ section.id }} .gift-banner__content {
-      left: 0;
-      top: clamp(360px, 82vw, 420px);
-      width: 82%;
-      height: 340px;
-      padding-left: clamp(20px, 5.5vw, 32px);
-      padding-top: clamp(28px, 7vw, 35px);
-      padding-right: 15px;
+      position: static;
+      order: 1;
+      width: 100%;
+      height: auto;
+      padding: 0 16px 12px;
+      background: transparent;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 5;
     }
 
     .gift-banner-{{ section.id }} .gift-banner__content h1 {
-      font-size: 48px;
-      letter-spacing: -2px;
-      margin-bottom: 30px;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin: 0 0 10px 0;
+      text-align: center;
+      color: #000;
+      line-height: 1.15;
     }
 
     .gift-banner-{{ section.id }} .gift-banner__description {
       width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+      text-align: center;
     }
 
     .gift-banner-{{ section.id }} .gift-banner__main-text {
-      font-size: 16px;
+      font-size: 14px;
+      line-height: 1.4;
+      color: #222;
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 0 !important;
     }
 
     .gift-banner-{{ section.id }} .gift-banner__secondary-text {
-      font-size: 15px;
+      display: none !important;
     }
 
-    .gift-banner-{{ section.id }} .gift-banner__shop {
-      width: 210px;
-      height: 50px;
-      margin-top: 30px;
-      font-size: 12px;
+    /* Hide second frame on mobile so only 1 frame image is used */
+    .gift-banner-{{ section.id }} .gift-banner__frame--bottom {
+      display: none !important;
     }
 
-    .gift-banner-{{ section.id }} .gift-banner__bottom {
+    /* SINGLE FRAME IMAGE: order 2 places illustration directly below text, slightly wider than viewport so edges crop nicely */
+    .gift-banner-{{ section.id }} .gift-banner__frame--top {
+      order: 2;
+      position: relative;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 130%;
+      max-width: none;
       height: auto;
-      min-height: 34px;
-      padding: 10px;
-      font-size: 8px;
-      letter-spacing: 1.1px;
+      display: block;
+      z-index: 1;
+      margin-top: 8px;
+      pointer-events: none;
+    }
+
+    /* SHOP NOW BUTTON: absolute positioned relative to hero container, floating over bottom of illustration */
+    .gift-banner-{{ section.id }} .gift-banner__shop {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 0;
+      z-index: 10;
+      width: 210px;
+      height: 46px;
+      background: #000;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* BOTTOM STRIP */
+    .gift-banner-{{ section.id }} .gift-banner__bottom {
+      width: 100%;
+      height: 38px;
+      min-height: 38px;
+      padding: 0 12px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      background: #f4f4f4;
+      color: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     }
   }
 </style>
